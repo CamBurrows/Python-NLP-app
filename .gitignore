@@ -232,3 +232,108 @@ Thumbs.db
 
 # NLTK data (will be downloaded automatically)
 nltk_data/
+
+# AWS SAM
+.aws-sam/
+samconfig.toml
+
+# AWS Lambda layers (will be created during build)
+backend/layers/
+
+# Environment files with sensitive data
+.env.local
+.env.*.local
+frontend/.env.production
+
+# AWS credentials and config
+.aws/
+aws-credentials.json
+
+# Deployment artifacts
+backend/.aws-sam/
+*.zip
+
+# Log files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Amplify build artifacts
+amplify/
+.amplifyrc
+
+# VS Code workspace settings
+.vscode/settings.json
+.vscode/launch.json
+
+# JetBrains IDEs
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Linux
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# Package lock files (optional - some teams prefer to include these)
+# Uncomment the next line if you want to ignore package-lock.json
+# frontend/package-lock.json
+
+# Python virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# SAM CLI specific
+.aws-sam/
+samconfig.toml
+
+# CloudFormation stack outputs (if you save them locally)
+stack-outputs.json
+cf-outputs.json
+
+# Local testing
+.pytest_cache/
+test-reports/
+
+# Coverage reports
+htmlcov/
+.coverage
+coverage.xml
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+AMPLIFY_DEPLOYMENT.md
