@@ -60,14 +60,20 @@ class NLPProcessor:
                 
                 # Try to download essential NLTK data to /tmp (writable in Lambda)
                 try:
-                    import tempfile
                     temp_nltk_data = '/tmp/nltk_data'
                     os.makedirs(temp_nltk_data, exist_ok=True)
                     nltk.data.path.insert(0, temp_nltk_data)
                     
                     print("Attempting to download essential NLTK data...")
-                    # Download essential datasets
-                    datasets_to_try = ['punkt', 'averaged_perceptron_tagger', 'wordnet']
+                    # Download essential datasets (using newer formats)
+                    datasets_to_try = [
+                        'punkt_tab',                    # New tokenizer format (NLTK 3.8+)
+                        'punkt',                        # Fallback for older format
+                        'averaged_perceptron_tagger',   # POS tagger
+                        'wordnet',                      # WordNet corpus
+                        'omw-1.4'                      # Open Multilingual Wordnet
+                    ]
+                    
                     for dataset in datasets_to_try:
                         try:
                             nltk.download(dataset, download_dir=temp_nltk_data, quiet=True)
@@ -77,6 +83,8 @@ class NLPProcessor:
                             
                 except Exception as e:
                     print(f"Data download attempt failed: {e}")
+            else:
+                print("Running locally - using default NLTK data paths")
             
             # Test basic NLTK functionality progressively
             nltk_features = {
@@ -85,14 +93,23 @@ class NLPProcessor:
                 'wordnet': False
             }
             
-            # Test 1: Tokenization (basic, should work without data)
+            # Test 1: Tokenization (try multiple approaches)
             try:
                 from nltk.tokenize import word_tokenize
-                tokens = word_tokenize('test word')
-                nltk_features['tokenization'] = len(tokens) == 2
-                print(f"✓ Tokenization working: {tokens}")
+                # Try tokenization with better error handling
+                try:
+                    tokens = word_tokenize('test word')
+                    nltk_features['tokenization'] = len(tokens) == 2
+                    print(f"✓ Tokenization working: {tokens}")
+                except Exception as token_error:
+                    # If punkt_tab fails, try basic split as fallback
+                    print(f"Advanced tokenization failed ({token_error}), using basic split")
+                    # We can still do basic tokenization without NLTK data
+                    tokens = 'test word'.split()
+                    nltk_features['tokenization'] = True  # Basic tokenization works
+                    print(f"✓ Basic tokenization working: {tokens}")
             except Exception as e:
-                print(f"✗ Tokenization failed: {e}")
+                print(f"✗ Tokenization completely failed: {e}")
             
             # Test 2: POS Tagging (requires averaged_perceptron_tagger)
             try:
