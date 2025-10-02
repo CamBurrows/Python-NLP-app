@@ -1,0 +1,81 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: NLP Application Backend - Serverless API
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+    Runtime: python3.13
+
+Parameters:
+  Stage:
+    Type: String
+    Default: dev
+    Description: Stage name for deployment
+  FrontendURL:
+    Type: String
+    Default: 'https://localhost:3000'
+    Description: Frontend URL for CORS configuration
+
+Resources:
+  NLPApi:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./
+      Handler: lambda_function.lambda_handler
+      Runtime: python3.13
+      MemorySize: 1024
+      Timeout: 30
+      Environment:
+        Variables:
+          FRONTEND_URL: !Ref FrontendURL
+          NLTK_DATA: /opt/nltk_data
+      Layers:
+        - !Ref NLTKLayer
+      Events:
+        ApiGateway:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: ANY
+            RestApiId: !Ref ApiGateway
+        ApiGatewayRoot:
+          Type: Api
+          Properties:
+            Path: /
+            Method: ANY
+            RestApiId: !Ref ApiGateway
+
+  ApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: !Ref Stage
+      Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: !Sub "'${FrontendURL}'"
+
+  NLTKLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: nltk-data-layer
+      Description: NLTK data for natural language processing
+      ContentUri: ./layers/nltk-layer/
+      CompatibleRuntimes:
+        - python3.13
+    Metadata:
+      BuildMethod: python3.13
+
+Outputs:
+  ApiGatewayEndpoint:
+    Description: "API Gateway endpoint URL"
+    Value: !Sub "https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Stage}/"
+    Export:
+      Name: !Sub "${AWS::StackName}-ApiEndpoint"
+
+  ApiGatewayRestApiId:
+    Description: "API Gateway REST API ID"
+    Value: !Ref ApiGateway
+    Export:
+      Name: !Sub "${AWS::StackName}-RestApiId"

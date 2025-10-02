@@ -6,35 +6,48 @@ from nltk.tag import pos_tag
 from nltk.tokenize import word_tokenize
 import random
 import re
+import os
 
 app = Flask(__name__)
-CORS(app)
+
+# Configure CORS for AWS deployment
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:8080",
+    "https://*.amplifyapp.com",
+    os.getenv('FRONTEND_URL', 'http://localhost:3000')
+]
+
+CORS(app, origins=allowed_origins, methods=['GET', 'POST', 'OPTIONS'], 
+     allow_headers=['Content-Type', 'Authorization'])
 
 class NLPProcessor:
     def __init__(self):
         self.download_required_data()
     
     def download_required_data(self):
-        """Download required NLTK data"""
-        try:
-            nltk.data.find('tokenizers/punkt')
-        except LookupError:
-            nltk.download('punkt')
+        """Download required NLTK data or use pre-downloaded data in Lambda"""
+        # Set NLTK data path for Lambda environment
+        if 'AWS_LAMBDA_FUNCTION_NAME' in os.environ:
+            nltk.data.path.append('/opt/nltk_data')
         
-        try:
-            nltk.data.find('taggers/averaged_perceptron_tagger')
-        except LookupError:
-            nltk.download('averaged_perceptron_tagger')
+        # Check and download required data
+        required_data = [
+            ('tokenizers/punkt', 'punkt'),
+            ('taggers/averaged_perceptron_tagger', 'averaged_perceptron_tagger'),
+            ('corpora/wordnet', 'wordnet'),
+            ('corpora/brown', 'brown')
+        ]
         
-        try:
-            nltk.data.find('corpora/wordnet')
-        except LookupError:
-            nltk.download('wordnet')
-        
-        try:
-            nltk.data.find('corpora/brown')
-        except LookupError:
-            nltk.download('brown')
+        for data_path, download_name in required_data:
+            try:
+                nltk.data.find(data_path)
+            except LookupError:
+                # Only download if not in Lambda environment
+                if 'AWS_LAMBDA_FUNCTION_NAME' not in os.environ:
+                    nltk.download(download_name)
+                else:
+                    print(f"Warning: {download_name} not found in Lambda layer")
     
     def get_part_of_speech(self, word):
         """Get part of speech for a word"""
@@ -279,10 +292,17 @@ def test_synonyms_antonyms():
         'success': True
     })
 
+# Initialize NLP processor
+nlp_processor = NLPProcessor()
+
 if __name__ == '__main__':
     print("Starting NLP API server...")
     print("Available endpoints:")
     print("- POST /api/analyze - Analyze a word")
-    print("- GET /api/health - Health check")
+    print("- GET /api/health - Health check") 
     print("- GET /api/test - Test synonyms and antonyms functionality")
-    app.run(debug=True, host='0.0.0.0', port=5000)
+    
+    # Run Flask development server
+    port = int(os.getenv('PORT', 5000))
+    debug = os.getenv('FLASK_ENV') == 'development'
+    app.run(debug=debug, host='0.0.0.0', port=port)

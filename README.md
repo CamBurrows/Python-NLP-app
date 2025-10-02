@@ -2,7 +2,7 @@
 
 A full-stack natural language processing application that provides comprehensive word analysis using Vue.js frontend and Python Flask backend with NLTK.
 
-![NLP Word Analyzer](https://img.shields.io/badge/NLP-Word%20Analyzer-blue) ![Vue.js](https://img.shields.io/badge/Vue.js-3.x-green) ![Python](https://img.shields.io/badge/Python-3.8+-blue) ![Flask](https://img.shields.io/badge/Flask-2.x-red) ![Vuetify](https://img.shields.io/badge/Vuetify-3.x-purple)
+![NLP Word Analyzer](https://img.shields.io/badge/NLP-Word%20Analyzer-blue) ![Vue.js](https://img.shields.io/badge/Vue.js-3.x-green) ![Python](https://img.shields.io/badge/Python-3.13-blue) ![Flask](https://img.shields.io/badge/Flask-2.x-red) ![Vuetify](https://img.shields.io/badge/Vuetify-3.x-purple)
 
 ## 🚀 Features
 
@@ -28,19 +28,21 @@ A full-stack natural language processing application that provides comprehensive
 
 ## 📋 Prerequisites
 
-- **Python 3.8+** with pip
+- **Python 3.13** with pip
 - **Node.js 16+** with npm
 - **Git** (for cloning)
 
 ## ⚡ Quick Start
 
-### 1. Clone the Repository
+### Local Development
+
+#### 1. Clone the Repository
 ```bash
 git clone <repository-url>
 cd nlp-app
 ```
 
-### 2. Backend Setup (Python Flask + NLTK)
+#### 2. Backend Setup (Python Flask + NLTK)
 ```bash
 cd backend
 pip install -r requirements.txt
@@ -199,6 +201,37 @@ npm run build
 # Serve static files with your preferred web server
 # (nginx, Apache, or any static hosting service)
 ```
+
+## ☁️ AWS Cloud Deployment
+
+This application is designed to be deployed on AWS using serverless architecture:
+
+### Backend Deployment (AWS Lambda + API Gateway)
+```bash
+cd backend
+
+# Create NLTK data layer
+./create_nltk_layer.sh  # Linux/Mac
+# or
+create_nltk_layer.bat   # Windows
+
+# Deploy with SAM CLI
+sam build
+sam deploy --guided
+```
+
+See `backend/DEPLOYMENT.md` for detailed instructions.
+
+### Frontend Deployment (AWS Amplify)
+1. Update `frontend/.env.production` with your Lambda API URL
+2. Deploy via AWS Amplify Console by connecting your Git repository
+3. Amplify will automatically use the `amplify.yml` configuration
+
+See `frontend/AMPLIFY_DEPLOYMENT.md` for detailed instructions.
+
+### Environment Variables
+- **Backend**: `FRONTEND_URL` for CORS configuration
+- **Frontend**: `VUE_APP_API_URL` for API endpoint
 
 ## 🤝 Contributing
 
