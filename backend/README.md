@@ -1,6 +1,6 @@
-# NLP Application Backend
+# NLP Backend - AWS Lambda API
 
-A Flask-based REST API that provides natural language processing capabilities using NLTK.
+A comprehensive Natural Language Processing API deployed as an AWS Lambda function with API Gateway.
 
 ## Features
 - Part of speech identification
